@@ -1,0 +1,50 @@
+version: "3.8"
+
+services:
+  db:
+    image: mongo
+    container_name: mongo-db
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./mongo-backup:/data/db
+    networks:
+      - shared-network
+
+  api:
+    container_name: task-api
+    restart: always
+    # image: task-api-prod:1.0.0
+    build: ./api
+      # context: api
+      # target: production
+      # dockerfile: Dockerfile
+    command: npm run start
+    ports:
+      - "8000:8000"
+    networks:
+      - shared-network
+    # depends_on:
+    #   - db
+  
+  client:
+    container_name: task-client
+    # image: task-client-prod:1.0.0
+    build: ./client
+      # context: client
+      # target: production
+      # dockerfile: Dockerfile
+    command: npm run dev
+    ports:
+      - "3000:3000"
+    networks:
+      - shared-network
+    depends_on:
+      - api
+    stdin_open: true 
+    tty: true
+
+networks:
+  shared-network:
+    driver: bridge
